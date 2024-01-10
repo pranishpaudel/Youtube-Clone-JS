@@ -1,12 +1,18 @@
 import { Cluster } from "puppeteer-cluster";
 
+// Function to generate a random string
+function generateRandomString() {
+  return Math.random().toString(36).substring(7);
+}
+
 // Function to be executed by each cluster worker
 async function botTask({ page, data }) {
   // Your bot logic goes here
   console.log(`Bot ${data.botId} is running`);
 
-  // Example: Print "Hello, World!"
-  console.log("Hello, World!");
+  // Generate and print a random string
+  const randomString = generateRandomString();
+  console.log(`Random String from Bot ${data.botId}: ${randomString}`);
 
   // Your bot logic continues...
 
@@ -15,7 +21,7 @@ async function botTask({ page, data }) {
 }
 
 // Number of parallel tasks (bots)
-const numBots = 4;
+const numBots = 10;
 
 // Create a cluster with the specified number of workers
 (async () => {
