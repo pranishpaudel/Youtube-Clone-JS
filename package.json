@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "type": "module",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon src/main.js"
   },
   "author": "Pranish Poudel",
   "license": "ISC",
