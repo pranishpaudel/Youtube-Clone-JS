@@ -1,7 +1,7 @@
 import {v2 as cloudinary} from 'cloudinary';
 import fs from 'fs';
 
-const FILEEEEEEE= '/Users/air/Desktop/vaneko.png'
+
           
 cloudinary.config({ 
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
@@ -10,7 +10,7 @@ cloudinary.config({
 });
 
 
-const uploadOnCloudinary= async(localFilePath)=> {
+export const uploadOnCloudinary= async(localFilePath)=> {
     try{
         if (!localFilePath) return null
         //upload the file on cloudinary
@@ -27,4 +27,3 @@ console.log("Some error")
 return null;
 }}
 
-uploadOnCloudinary(FILEEEEEEE);
