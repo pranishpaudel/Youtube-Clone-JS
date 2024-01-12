@@ -23,7 +23,7 @@ asyncHandler(async (req,res) =>{
 const homis= await req.files;
 console.log(homis);
     const avatarLocalPath=  homis?.avatar[0]?.path;
-    // const coverImageLocalPath=  homis?.coverimage[0]?.path;
+//  const coverImageLocalPath=  homis?.coverimage[0]?.path;
 if (!avatarLocalPath){
     throw new ApiError(400,"Avatar file is required");
 }
