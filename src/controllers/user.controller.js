@@ -3,6 +3,22 @@ import {asyncHandler} from '/Users/air/Desktop/Youtube Clone JS/utils/asyncHandl
 import { User } from '../models/user.models.js';
 import { uploadOnCloudinary } from '../../utils/cloudinary.js';
 import { ApiResponse } from '../../utils/ApiResponse.js';
+
+
+const generateAccessRefreshTokens= async (userId) => {
+try{
+const user= await User.findById(userId);
+console.log(`Second user: ${user}`);
+const accessToken= user.generateAccessToken;
+const refreshToken= user.generateRefreshoken;
+user.refreshToken= refreshToken;
+await user.save({validateBeforeSave: false});
+return {accessToken,refreshToken};
+}
+catch(error){
+    throw new ApiError(500,"Something went wrong while generating refresh and access token");
+}
+}
 //In
 
 export const registerUser= 
@@ -58,4 +74,30 @@ const createdUser= await User.findById(user._id).select(
         new ApiResponse(200, createdUser, "User Registered Successuly")
     )
 
+})
+
+
+export const loginUser= asyncHandler(async(req,res)=>{
+    console.log(req.body);
+    const {email,username,password}=  req.body;
+    console.log(email,username,password);
+
+    if (!username || !email){
+        throw new ApiError(400,"Username or email is a required field");
+    }
+
+    const user= await User.findone({
+        $or: [{username},{email}]
+    })
+console.log(`First user: ${user}`);
+    if (!user){
+        throw new ApiError(404,"User does not exist");
+    }
+
+    const isPasswordValid= await user.isPasswordCorrect(password);
+    if(!isPasswordValid){
+throw new ApiError(404,"The password does not match your email or username");
+    }
+    const {accessToken,refreshToken} = await generateAccessRefreshTokens(user._id);
+//Grab the access and refresh token from the user
 })

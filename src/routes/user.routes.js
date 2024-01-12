@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { registerUser } from "/Users/air/Desktop/Youtube Clone JS/src/controllers/user.controller.js";
+import { registerUser,loginUser } from "/Users/air/Desktop/Youtube Clone JS/src/controllers/user.controller.js";
 import { upload } from '../middlewares/multer.middleware.js';
 import { ApiError } from "/Users/air/Desktop/Youtube Clone JS/utils/ApiError.js";
 
@@ -16,4 +16,6 @@ router.route("/register").post(upload.fields([
     }
 ]), registerUser);
 
+
+router.route("/login").post(loginUser);
 export default router;
