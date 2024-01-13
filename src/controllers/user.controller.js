@@ -133,5 +133,25 @@ throw new ApiError(404,"The password does not match your email or username");
 
 
 
-const logoutUser= asyncHandler(async(req,res)=>{
+export const logoutUser= asyncHandler(async(req,res)=>{
+    await User.findbyIdandUpdate(
+        req.user._id,{
+            $set: {
+                refreshToken: undefined
+            }
+        },
+        {
+            new: true
+        }
+    )
+
+    const options= {
+        httponly: true,
+        secure: true,
+    }
+    return res
+    .status(200)
+    .clearCookie("accessToken",options)
+    .clearCookie("refreshToken",options)
+    .json(new ApiResponse(200,{},"User logged Out"));
 })
