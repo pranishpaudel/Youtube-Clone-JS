@@ -8,9 +8,9 @@ import { ApiResponse } from '../../utils/ApiResponse.js';
 const generateAccessRefreshTokens= async (userId) => {
 try{
 const user= await User.findById(userId);
-console.log(`Second user: ${user}`);
-const accessToken= user.generateAccessToken;
-const refreshToken= user.generateRefreshoken;
+// console.log(`Second user: ${user}`);
+const accessToken= user.generateAccessToken();
+const refreshToken= user.generateRefreshoken();
 user.refreshToken= refreshToken;
 await user.save({validateBeforeSave: false});
 return {accessToken,refreshToken};
@@ -79,14 +79,17 @@ const createdUser= await User.findById(user._id).select(
 
 export const loginUser= asyncHandler(async(req,res)=>{
     console.log(req.body);
-    const {email,username,password}=  req.body;
-    console.log(email,username,password);
+    // const {email,username,password}=  req.body;
+    const email= "insa@gmail.com";
+    const username= "theinsa55";
+   const   password= "Insan";
+    // console.log(email,username,password);
 
     if (!username || !email){
         throw new ApiError(400,"Username or email is a required field");
     }
 
-    const user= await User.findone({
+    const user= await User.findOne({
         $or: [{username},{email}]
     })
 console.log(`First user: ${user}`);
@@ -99,5 +102,36 @@ console.log(`First user: ${user}`);
 throw new ApiError(404,"The password does not match your email or username");
     }
     const {accessToken,refreshToken} = await generateAccessRefreshTokens(user._id);
+    // console.log(accessToken,refreshToken);
+
+    const loggedInUser= await User.findById(user._id);
+    console.log(loggedInUser);
+
+    const options= {
+        httponly: true,
+        secure: true,
+    }
+
+
+    return res
+    .status(400)
+    .cookie("accessToken",accessToken,options)
+    .cookie("refreshToken",refreshToken,options)
+    .json(
+        new ApiResponse(
+            200,
+            {
+                user: loggedInUser ,accessToken,refreshToken
+            },
+            "User logged in successfuly"
+        )
+    )
+
+    console.log(req.cookies);
 //Grab the access and refresh token from the user
+})
+
+
+
+const logoutUser= asyncHandler(async(req,res)=>{
 })
