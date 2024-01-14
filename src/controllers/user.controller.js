@@ -161,38 +161,45 @@ export const logoutUser= asyncHandler(async(req,res)=>{
 
 export const refreshAccessToken = asyncHandler(async (req, res) => {
     try {
-      const incomingRefreshToken = res.cookies.refreshToken || req.body.refreshToken;
-      if (!incomingRefreshToken) {
-        throw new ApiError(401, "unauthorized request");
-      }
-      const decodedToken = jwt.verify(
-        incomingRefreshToken,
-        process.env.REFRESH_TOKEN_SECRET,
-      );
-      const user = await User.findById(decodedToken._id);
-      console.log("user");
-      if (!user) {
-        throw new ApiError("Invalid Refresh Token");
-      }
-  
-      if (incomingRefreshToken !== user?.refreshToken) {
-        throw new ApiError("Invalid Refresh Token");
-      }
-      const options = {
-        httponly: true,
-        secure: true,
-      };
-      const { accessToken, newrefreshToken } = await generateAccessRefreshTokens(user._id);
-      return res.status(200)
-        .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", newrefreshToken, options)
-        .json(
-          new ApiResponse(200, { accessToken, refreshToken: newrefreshToken }),
-          "Access Token Refreshed"
+        // const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
+        const incomingRefreshToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NWEyMGU2NzQyNGZmMGIwY2NiOGRhNmEiLCJlbWFpbCI6Imluc2FAZ21haWwuY29tIiwidXNlcm5hbWUiOiJ0aGVpbnNhNTUiLCJpYXQiOjE3MDUyMTM4MjQsImV4cCI6MTcwNjA3NzgyNH0.od4IvpFyqP_pgnxIGMhuqji4soxB8DQMC1T2HdHmfWk';
+
+        if (!incomingRefreshToken) {
+            throw new ApiError(401, "unauthorized request");
+        }
+
+        const decodedToken = jwt.verify(
+            incomingRefreshToken,
+            process.env.REFRESH_TOKEN_SECRET,
         );
-  
+console.log(decodedToken);
+        const user = await User.findById(decodedToken._id);
+
+        console.log(user);
+
+        if (!user) {
+            throw new ApiError(401, "Invalid Refresh Token v1");
+        }
+
+        if (incomingRefreshToken !== user?.refreshToken) {
+            throw new ApiError(401, "Invalid Refresh Token v2");
+        }
+
+        const options = {
+            httponly: true,
+            secure: true,
+        };
+
+        const { accessToken, newrefreshToken } = await generateAccessRefreshTokens(user._id);
+
+        const apiResponse = new ApiResponse(200, { accessToken, refreshToken: newrefreshToken }, "Access Token Refreshed");
+
+        return res.status(200)
+            .cookie("accessToken", accessToken, options)
+            .cookie("refreshToken", newrefreshToken, options)
+            .json(apiResponse);
+
     } catch (error) {
-      throw new ApiError("Error in matching refresh token");
+        throw new ApiError(401, "Error in matching refresh token");
     }
-  });
-  
+});
