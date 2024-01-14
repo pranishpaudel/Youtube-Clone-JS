@@ -159,7 +159,7 @@ export const logoutUser= asyncHandler(async(req,res)=>{
 
 
 
-const refreshAccessToken = asyncHandler(async (req, res) => {
+export const refreshAccessToken = asyncHandler(async (req, res) => {
     try {
       const incomingRefreshToken = res.cookies.refreshToken || req.body.refreshToken;
       if (!incomingRefreshToken) {
