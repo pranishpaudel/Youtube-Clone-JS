@@ -3,6 +3,7 @@ import {asyncHandler} from '/Users/air/Desktop/Youtube Clone JS/utils/asyncHandl
 import { User } from '../models/user.models.js';
 import { uploadOnCloudinary } from '../../utils/cloudinary.js';
 import { ApiResponse } from '../../utils/ApiResponse.js';
+import jwt  from 'jsonwebtoken';
 
 
 const generateAccessRefreshTokens= async (userId) => {
@@ -79,10 +80,10 @@ const createdUser= await User.findById(user._id).select(
 
 export const loginUser= asyncHandler(async(req,res)=>{
     console.log(req.body);
-    // const {email,username,password}=  req.body;
-    const email= "insa@gmail.com";
-    const username= "theinsa55";
-   const   password= "Insan";
+    const {email,username,password}=  req.body;
+//     const email= "insa@gmail.com";
+//     const username= "theinsa55";
+//    const   password= "Insan";
     // console.log(email,username,password);
 
     if (!username || !email){
@@ -102,7 +103,7 @@ console.log(`First user: ${user}`);
 throw new ApiError(404,"The password does not match your email or username");
     }
     const {accessToken,refreshToken} = await generateAccessRefreshTokens(user._id);
-    // console.log(accessToken,refreshToken);
+    console.log(accessToken,refreshToken);
 
     const loggedInUser= await User.findById(user._id);
     console.log(loggedInUser);
@@ -134,7 +135,7 @@ throw new ApiError(404,"The password does not match your email or username");
 
 
 export const logoutUser= asyncHandler(async(req,res)=>{
-    await User.findbyIdandUpdate(
+    await User.findByIdAndUpdate(
         req.user._id,{
             $set: {
                 refreshToken: undefined
@@ -155,3 +156,43 @@ export const logoutUser= asyncHandler(async(req,res)=>{
     .clearCookie("refreshToken",options)
     .json(new ApiResponse(200,{},"User logged Out"));
 })
+
+
+
+const refreshAccessToken = asyncHandler(async (req, res) => {
+    try {
+      const incomingRefreshToken = res.cookies.refreshToken || req.body.refreshToken;
+      if (!incomingRefreshToken) {
+        throw new ApiError(401, "unauthorized request");
+      }
+      const decodedToken = jwt.verify(
+        incomingRefreshToken,
+        process.env.REFRESH_TOKEN_SECRET,
+      );
+      const user = await User.findById(decodedToken._id);
+      console.log("user");
+      if (!user) {
+        throw new ApiError("Invalid Refresh Token");
+      }
+  
+      if (incomingRefreshToken !== user?.refreshToken) {
+        throw new ApiError("Invalid Refresh Token");
+      }
+      const options = {
+        httponly: true,
+        secure: true,
+      };
+      const { accessToken, newrefreshToken } = await generateAccessRefreshTokens(user._id);
+      return res.status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", newrefreshToken, options)
+        .json(
+          new ApiResponse(200, { accessToken, refreshToken: newrefreshToken }),
+          "Access Token Refreshed"
+        );
+  
+    } catch (error) {
+      throw new ApiError("Error in matching refresh token");
+    }
+  });
+  
