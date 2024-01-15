@@ -46,7 +46,7 @@ if (!avatarLocalPath){
 }
 
 const avatar= await uploadOnCloudinary(avatarLocalPath);
-console.log(avatar);
+// console.log(avatar);
 // const coverImage= await uploadOnCloudinary(coverImageLocalPath)
 
 if(!avatar){
@@ -216,7 +216,7 @@ try {
             await user.save({validateBeforeSave: false});
             return res
             .status(200)
-            .json(new ApiResponse(200, {}, "Password Changed"));
+            .json(new ApiResponse(200, {user: req.user}, "Password Changed"));
         }
         else{
             throw new ApiError(404,"Your old password doesn't match.");
@@ -225,4 +225,36 @@ try {
     throw new ApiError(501, 'Error in changing the password');
 }
 
+})
+
+
+
+export const getCurrentUser = asyncHandler(async (req, res) => {
+    return res
+      .status(200)
+      .json({"user":req.user});
+  });
+  
+
+export const updateUserAvatar= asyncHandler(async(req,res)=>{
+
+
+    const homis= await req.files; 
+    const avatarLocalPath=  homis?.avatar[0]?.path;
+    if (!avatarLocalPath){
+        throw new ApiError("Avatar is a required field");
+    }
+    const avatar= await uploadOnCloudinary(avatarLocalPath);
+
+const user= await User.findById(req.user?._id);
+
+if(!user){
+    throw new ApiError("Error Retrieving User");
+}
+
+user.avatar= avatar['url'];
+await user.save()
+return res
+.status(200)
+.json(new ApiResponse(200, {user},"Avatar Updated Successfully."))
 })
