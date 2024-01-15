@@ -203,3 +203,26 @@ console.log(decodedToken);
         throw new ApiError(401, "Error in matching refresh token");
     }
 });
+
+
+export const changeCurrentPassword= asyncHandler(async(req,res)=>{
+    const {oldPassword,newPassword}= req.body;
+try {
+        const user= await User.findById(req.user?._id);
+       
+        const validatePassword= await user.isPasswordCorrect(oldPassword);
+        if (validatePassword){
+            user.password= await newPassword;
+            await user.save({validateBeforeSave: false});
+            return res
+            .status(200)
+            .json(new ApiResponse(200, {}, "Password Changed"));
+        }
+        else{
+            throw new ApiError(404,"Your old password doesn't match.");
+        }
+} catch (error) {
+    throw new ApiError(501, 'Error in changing the password');
+}
+
+})
