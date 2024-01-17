@@ -258,3 +258,13 @@ return res
 .status(200)
 .json(new ApiResponse(200, {user},"Avatar Updated Successfully."))
 })
+
+
+
+const getUserChannelProfile= asyncHandler(async(req,res)=>{
+    const {username}= req.params;
+
+if(!username?.trim()){
+    throw new ApiError(404,"Username is a required field");
+}
+})
