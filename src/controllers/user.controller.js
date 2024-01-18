@@ -267,4 +267,45 @@ const getUserChannelProfile= asyncHandler(async(req,res)=>{
 if(!username?.trim()){
     throw new ApiError(404,"Username is a required field");
 }
+
+const channel= await User.aggregate(
+    [
+        {
+            $match : {
+                username: username
+            }
+        },
+        {
+            $lookup : {
+                from: "subscription",
+                localField: "_id",
+                foreignField: "channel",
+                as : "subscribers"
+            }
+        },
+        {
+            $lookup : {
+                from: "subscription",
+                localField: "_id",
+                foreignField: "subscriber",
+                as : "subscribedTo"
+            }
+        },
+        {
+            $addFields: {
+                subscribersCount: {
+                    $size: "$subscribers"
+                },
+                channelsSubscribedToCount: {
+                    $size: "subscribedTo"
+                },
+                isSubscribed: {
+                    $cond: {
+                        if: {$in:[req.user?._id, "$subscribers.subscriber"]}
+                    }
+                }
+            }
+        }
+    ]
+);
 })
