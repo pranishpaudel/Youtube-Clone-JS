@@ -301,11 +301,33 @@ const channel= await User.aggregate(
                 },
                 isSubscribed: {
                     $cond: {
-                        if: {$in:[req.user?._id, "$subscribers.subscriber"]}
+                        if: {$in:[req.user?._id, "$subscribers.subscriber"]},
+                        then: true,
+                        else: false,
                     }
                 }
+            }
+        },
+        {
+            $project : {
+                fullName: 1,
+                username: 1,
+                subscriberCount: 1,
+                avatar:1,
+                coverImage: 1,
+                email: 1
             }
         }
     ]
 );
+
+if (!channel?.length){
+throw new ApiError(404, "Channel does not exist");
+}
+
+return res
+.status(200)
+.json(
+    new ApiResponse(200,channel,"User channel fetched successfully")
+)
 })
